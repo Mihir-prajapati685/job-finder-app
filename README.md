@@ -77,7 +77,7 @@ jwt.secret=your_secret_key
 
 📦 Installation
 git clone https://github.com/Mihir-prajapati685/job-finder-app.git
-cd ecommerce-clothes-app
+cd frontend
 flutter pub get
 flutter run
 
