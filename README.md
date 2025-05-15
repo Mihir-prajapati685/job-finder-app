@@ -69,7 +69,7 @@ src/main/java/
 1. Create a MySQL database (e.g., `job_finder`)
 2. Update `application.properties`:
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/job_finder
+spring.datasource.url=jdbc:mysql://localhost:3306/mysqlconndat
 spring.datasource.username=your_db_user
 spring.datasource.password=your_db_password
 jwt.secret=your_secret_key
