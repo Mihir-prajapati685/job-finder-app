@@ -29,7 +29,6 @@ public class PostController {
     @Autowired
     private CommentsService commentsService;
 
-
     @PostMapping("/post")
     public ResponseEntity<?> addPost(@RequestBody PostModel postModel,
                                      @AuthenticationPrincipal CustomUserDetails userDetails) {

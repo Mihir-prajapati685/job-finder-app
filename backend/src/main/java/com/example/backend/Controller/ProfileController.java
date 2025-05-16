@@ -56,7 +56,6 @@ public class ProfileController {
         return ResponseEntity.ok(profile);
     }
 
-
     @PutMapping("/update")
     public ResponseEntity<Map<String,ProfileModel>> updatedata(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody ProfileModel profileModel){
       UserModel userModel=customUserDetails.getUser();

@@ -15,4 +15,9 @@ public interface PostRepo extends JpaRepository<PostModel,Long> {
     List<PostModel> findByUser(UserModel currentUser);
 
     List<PostModel> findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(String keyword, String keyword1);
+
+    List<PostModel> findByUserOrderByCreateAtDesc(UserModel user);
+
+    // Or fetch all posts ordered by createdAt descending (if you want all users' posts)
+//    List<PostModel> findAllByOrderByCreatedAtDesc();
 }

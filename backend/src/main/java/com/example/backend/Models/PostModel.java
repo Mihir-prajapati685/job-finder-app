@@ -23,6 +23,7 @@ public class PostModel {
 
     private String title;
 
+    @Column(length = 10000)
     private String content;
 
     private String url;

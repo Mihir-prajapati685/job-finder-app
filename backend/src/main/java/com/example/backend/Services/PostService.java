@@ -23,10 +23,20 @@ public class PostService {
         return savedPost;
     }
 
+//    public List<PostModel> getallpost(UserModel currentUser) {
+//        List<PostModel> userPosts = postRepo.findByUser(currentUser);
+//        return userPosts;
+//    }
+
+    // If you want to show all posts (not just the user's)
+//    public List<PostModel> getAllPostsSorted() {
+//        return postRepo.findAllByOrderByCreatedAtDesc();
+//    }
+
     public List<PostModel> getallpost(UserModel currentUser) {
-        List<PostModel> userPosts = postRepo.findByUser(currentUser);
-        return userPosts;
+        return postRepo.findByUserOrderByCreateAtDesc(currentUser);
     }
+
 
     public boolean deletePostById(Long postId, UserModel currentUser) {
         Optional<PostModel> optionalPost = postRepo.findById(postId);
@@ -50,4 +60,5 @@ public class PostService {
     public List<PostModel> searchPosts(String keyword) {
         return postRepo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
     }
+
 }

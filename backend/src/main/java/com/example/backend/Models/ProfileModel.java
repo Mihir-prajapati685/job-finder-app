@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.scheduling.support.SimpleTriggerContext;
+import org.w3c.dom.Text;
 
 import java.time.LocalDateTime;
 
@@ -28,8 +29,12 @@ public class ProfileModel {
     private String country;
     private String  city;
     private String about;
+    private String experience;
+    private String pronoums;
+    private String industry;
 
-
+    private String link;
+    private String linktext;
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -98,5 +103,45 @@ public class ProfileModel {
 
     public void setAbout(String about) {
         this.about = about;
+    }
+
+    public String getPronoums() {
+        return pronoums;
+    }
+
+    public void setPronoums(String pronoums) {
+        this.pronoums = pronoums;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public String getLinktext() {
+        return linktext;
+    }
+
+    public void setLinktext(String linktext) {
+        this.linktext = linktext;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public String getExperience() {
+        return experience;
+    }
+
+    public void setExperience(String experience) {
+        this.experience = experience;
     }
 }
