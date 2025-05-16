@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linkedin_clone/providers/auth_provider.dart';
+import 'package:linkedin_clone/providers/profile_provider.dart';
 import 'package:linkedin_clone/screens/auth/login_screen.dart';
 import 'package:linkedin_clone/screens/home_screen.dart';
 
@@ -8,9 +9,12 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()), // Add this
+      ],
+      child: const MyApp(),
     ),
   );
 }

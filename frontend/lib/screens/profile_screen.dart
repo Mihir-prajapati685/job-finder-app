@@ -1,122 +1,140 @@
 import 'package:flutter/material.dart';
+import 'package:linkedin_clone/providers/profile_provider.dart';
+import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load profile data when screen initializes
+    Provider.of<ProfileProvider>(context, listen: false).loadProfileData();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final profileProvider = Provider.of<ProfileProvider>(context);
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Info Section
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: profileProvider.username == null
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Profile Avatar
-                  Center(
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+                  // Profile Info Section
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Profile Avatar
+                        Center(
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.blue.shade700,
+                            child: Text(
+                              (profileProvider.username?.isNotEmpty ?? false)
+                                  ? profileProvider.username![0].toUpperCase()
+                                  : '',
+                              style: const TextStyle(
+                                fontSize: 40,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                          fit: BoxFit.cover,
                         ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 20),
-                      child: GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => _buildEditDialog(context),
-                          );
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(Icons.edit, color: Colors.white),
+                        SizedBox(
+                          height: 5,
                         ),
-                      ),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      _buildEditDialog(context),
+                                );
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Colors.blue,
+                                child: Icon(Icons.edit, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Center(
+                          child: Text(
+                            profileProvider.username ?? 'No Name',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Center(
+                          child: Text(
+                            'Software Engineer at Tech Company',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Center(
+                          child: Text(
+                            'San Francisco, California',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  const Center(
-                    child: Text(
-                      'John Doe',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+
+                  const Divider(),
+
+                  // About Section
+                  _buildSection(
+                    'About',
+                    'Experienced software engineer with a passion for creating innovative solutions. '
+                        'Specialized in mobile app development and cloud technologies.',
                   ),
-                  const SizedBox(height: 4),
-                  const Center(
-                    child: Text(
-                      'Software Engineer at Tech Company',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
+
+                  // Experience Section
+                  _buildSection(
+                    'Experience',
+                    'Senior Software Engineer\nTech Company\n2020 - Present\n\n'
+                        'Software Engineer\nPrevious Company\n2018 - 2020',
                   ),
-                  const SizedBox(height: 4),
-                  const Center(
-                    child: Text(
-                      'San Francisco, California',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
+
+                  // Education Section
+                  _buildSection(
+                    'Education',
+                    'Bachelor of Science in Computer Science\nUniversity of Technology\n2014 - 2018',
                   ),
-                  const SizedBox(height: 16),
+
+                  // Skills Section
+                  _buildSection(
+                    'Skills',
+                    'Flutter • Dart • Firebase • REST APIs • Git • Agile Methodologies',
+                  ),
                 ],
               ),
             ),
-
-            const Divider(),
-
-            // About Section
-            _buildSection(
-              'About',
-              'Experienced software engineer with a passion for creating innovative solutions. '
-                  'Specialized in mobile app development and cloud technologies.',
-            ),
-
-            // Experience Section
-            _buildSection(
-              'Experience',
-              'Senior Software Engineer\nTech Company\n2020 - Present\n\n'
-                  'Software Engineer\nPrevious Company\n2018 - 2020',
-            ),
-
-            // Education Section
-            _buildSection(
-              'Education',
-              'Bachelor of Science in Computer Science\nUniversity of Technology\n2014 - 2018',
-            ),
-
-            // Skills Section
-            _buildSection(
-              'Skills',
-              'Flutter • Dart • Firebase • REST APIs • Git • Agile Methodologies',
-            ),
-          ],
-        ),
-      ),
     );
   }
 
