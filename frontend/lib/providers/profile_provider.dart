@@ -51,6 +51,9 @@ class ProfileProvider with ChangeNotifier {
   String? get email => _email;
   String? get token => _token;
 
+  List<Map<String, dynamic>> userPosts = [];
+  bool isPostLoading = false;
+
   // Load auth info from SharedPreferences
   Future<void> loadProfileData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -144,5 +147,38 @@ class ProfileProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     notifyListeners();
+  }
+
+  Future<void> fetchUserPosts() async {
+    if (_token == null) {
+      await loadProfileData(); // Ensure token is available
+    }
+
+    final url = Uri.parse('http://localhost:8084/jobpost/get');
+
+    try {
+      isPostLoading = true;
+      notifyListeners();
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': '$_token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        userPosts = data.cast<Map<String, dynamic>>();
+      } else {
+        print("Failed to fetch posts: ${response.body}");
+      }
+    } catch (e) {
+      print("Error fetching posts: $e");
+    } finally {
+      isPostLoading = false;
+      notifyListeners();
+    }
   }
 }

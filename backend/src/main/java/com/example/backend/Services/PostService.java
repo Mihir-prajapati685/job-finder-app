@@ -61,4 +61,7 @@ public class PostService {
         return postRepo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
     }
 
+    public List<PostModel> getAllPostsSortedByDate() {
+        return postRepo.findAllByOrderByCreateAtDesc();
+    }
 }

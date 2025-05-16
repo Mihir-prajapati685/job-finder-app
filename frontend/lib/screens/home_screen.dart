@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
-
   bool _isLoading = false;
   bool _isInit = true;
   String? _errorMessage;
@@ -53,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final posts = postProvider.posts;
 
     final screens = [
-      // Home Feed with provider data
       _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
@@ -64,17 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final post = posts[index];
 
-                    // Map your backend fields to your UI fields accordingly:
-                    final userName = post['user']['username'] ?? 'Unknown';
-                    final headline = post['user']['email'] ?? '';
+                    final user = post['user'] ?? {};
+                    final userName = user['username'] ?? 'Unknown';
+                    final headline = user['email'] ?? '';
                     final date = post['createAt'] != null
                         ? post['createAt'].toString().substring(0, 10)
                         : '';
                     final avatar =
-                        post['user']['username'][0].toUpperCase() ?? '';
+                        userName.isNotEmpty ? userName[0].toUpperCase() : '?';
                     final content = post['content'] ?? '';
                     final image = post['url'] ?? '';
-                    final likes = post['likes'] ?? 0;
+                    int likes = post['likes'] ?? 0;
                     final comments = post['comments'] ?? 0;
                     bool liked = post['liked'] ?? false;
 
@@ -91,10 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundImage:
-                                      null, // since avatar url not provided in your data
-                                  child: Text(post['user']['username'][0]
-                                      .toUpperCase()),
+                                  backgroundColor: Colors.blue.shade100,
+                                  child: Text(avatar),
                                   radius: 24,
                                 ),
                                 const SizedBox(width: 12),
@@ -124,7 +120,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 12),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: NetworkImage(image),
+                                child: Image.network(
+                                  image,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Text('Image failed to load'),
+                                ),
                               ),
                             ],
                             const SizedBox(height: 12),
@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-      CreatePostCard(),
+      const CreatePostCard(),
       const JobsScreen(),
       ProfileScreen(),
     ];

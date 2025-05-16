@@ -50,6 +50,13 @@ public class PostController {
         return ResponseEntity.ok(userPosts);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<PostModel>> getAllPosts() {
+        List<PostModel> allPosts = postService.getAllPostsSortedByDate();
+        return ResponseEntity.ok(allPosts);
+    }
+
+
     @PutMapping("/post/{postId}/update")
     public ResponseEntity<?> updatePost(
             @PathVariable Long postId,

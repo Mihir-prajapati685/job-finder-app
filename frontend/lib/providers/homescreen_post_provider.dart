@@ -13,7 +13,7 @@ class HomescreenPostProvider with ChangeNotifier {
     final token = pref.getString('token');
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8084/jobpost/get'),
+        Uri.parse('http://localhost:8084/jobpost/all'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': '$token'
