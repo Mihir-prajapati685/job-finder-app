@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:linkedin_clone/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,12 +18,33 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToLogin() async {
-    await Future.delayed(const Duration(seconds: 2)); // Show splash for 2 seconds
+    await Future.delayed(
+        const Duration(seconds: 2)); // Show splash for 2 seconds
     if (!mounted) return;
+    await _checkLoginStatus();
+  }
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final email = prefs.getString('email');
+
+    await Future.delayed(
+        const Duration(seconds: 2)); // show splash for 2 seconds
+
+    if (token != null && email != null) {
+      // Logged in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      // Not logged in
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
   }
 
   @override
@@ -55,4 +78,4 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
-} 
+}

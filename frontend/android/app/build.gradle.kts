@@ -6,8 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.linkedin_clone"
-    compileSdk = 34
+    namespace = "com.example.job_finder"
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -16,40 +16,34 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.linkedin_clone"
+        applicationId = "com.example.job_finder"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 21
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
-    }
-
-    lint {
-        disable += "InvalidPackage"
     }
 }
 
 dependencies {
-    implementation("androidx.window:window:1.0.0")
-    implementation("androidx.window:window-java:1.0.0")
-    implementation("androidx.multidex:multidex:2.0.1")
+    implementation("com.google.errorprone:error_prone_annotations:2.20.0")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
+    implementation("com.google.crypto.tink:tink-android:1.8.0")
 }
 
 flutter {

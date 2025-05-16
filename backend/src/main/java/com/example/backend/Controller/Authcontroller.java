@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -33,47 +34,42 @@ public class Authcontroller {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public String register(@RequestBody UserModel userModel){
+    public ResponseEntity<String> register(@RequestBody UserModel userModel){
         if (repo.findByEmail(userModel.getEmail()).isPresent()) {
-            return "admin already exist";
+            return new ResponseEntity<>("User already exist", HttpStatus.ALREADY_REPORTED);
         }
         userModel.setPassword(passwordEncoder.encode(userModel.getPassword()));
 
         repo.save(userModel);
-        return "Admin registered successfully";
+        return new ResponseEntity<>("User Register Successfully", HttpStatus.OK);
 
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserModel userModel) {
-        String result = customUserDetailsService.login(
-                userModel.getEmail(),
-                userModel.getPassword(),
-                passwordEncoder
-        );
-
-//        if (!result.startsWith("login success")) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
-//        }
-        if (result != null && result.startsWith("login success")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
-        }
-
-        String token = jwtUtil.generateToken(new CustomUserDetails(userModel));
-
-
+        // 1. Check if user exists by email
         Optional<UserModel> user = repo.findByEmail(userModel.getEmail());
 
-        if (user.isPresent()) {
-            return ResponseEntity.ok(Map.of(
-                    "token", "Bearer " + token,
-                    "user", user.get()
-
-            ));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"); // Email गलत
         }
+
+        // 2. Check if password matches
+        if (!passwordEncoder.matches(userModel.getPassword(), user.get().getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password"); // Password गलत
+        }
+
+        // 3. Generate token
+        String token = jwtUtil.generateToken(new CustomUserDetails(user.get()));
+
+        // 4. Return success response
+        return ResponseEntity.ok(Map.of(
+                "token", "Bearer " + token,
+                "user", user.get(),
+                "username",user.get().getUsername()
+        ));
     }
+
 
     @GetMapping("/profile")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {

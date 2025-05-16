@@ -1,4 +1,8 @@
+import 'package:elegant_notification/elegant_notification.dart';
+import 'package:elegant_notification/resources/arrays.dart';
 import 'package:flutter/material.dart';
+import 'package:linkedin_clone/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 import 'register_screen.dart';
 import '../home_screen.dart';
 
@@ -23,23 +27,46 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate login delay
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final authData =
+          await Provider.of<AuthProvider>(context, listen: false).login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      // Show success notification
+      ElegantNotification.success(
+        title: const Text("Login Successful"),
+        description: Text("Welcome ${authData['email']}"),
+        animation: AnimationType.fromTop,
+      ).show(context);
+
+      // Optionally: Store token in shared preferences here
+
       if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    });
+    } catch (e) {
+      ElegantNotification.error(
+        title: const Text("Login Failed"),
+        description: Text(e.toString()),
+        animation: AnimationType.fromTop,
+      ).show(context);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -153,4 +180,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-} 
+}

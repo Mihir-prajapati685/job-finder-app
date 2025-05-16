@@ -48,6 +48,8 @@ dependencies:
   flutter_markdown: ^0.6.17
   timeago: ^3.5.0
   custom_refresh_indicator: ^4.0.1
+  liquid_pull_to_refresh: ^3.0.1
+  elegant_notification: ^2.5.1
 
 dev_dependencies:
   flutter_test:

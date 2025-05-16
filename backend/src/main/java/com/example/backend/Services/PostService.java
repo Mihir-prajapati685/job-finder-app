@@ -12,11 +12,11 @@ import java.util.Optional;
 
 @Service
 public class PostService {
-   @Autowired
-   private PostRepo postRepo;
+    @Autowired
+    private PostRepo postRepo;
 
-   @Autowired
-   private CommentRepo commentRepo;
+    @Autowired
+    private CommentRepo commentRepo;
 
     public PostModel addpost(PostModel postModel, UserModel userModel) {
         PostModel savedPost = postRepo.save(postModel);
@@ -24,7 +24,7 @@ public class PostService {
     }
 
     public List<PostModel> getallpost(UserModel currentUser) {
-        List<PostModel> userPosts =postRepo.findByUser(currentUser);
+        List<PostModel> userPosts = postRepo.findByUser(currentUser);
         return userPosts;
     }
 

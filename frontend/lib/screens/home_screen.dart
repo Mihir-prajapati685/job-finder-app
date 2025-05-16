@@ -13,16 +13,22 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
-  // Mock posts data
-  final List<Map<String, dynamic>> _posts = [
+  List<Map<String, dynamic>> _posts = [];
+  bool _isLoadingMore = false;
+  int _page = 1;
+  final int _limit = 2; // posts per page
+
+  final List<Map<String, dynamic>> _allPosts = [
+    // original 3 posts repeated for demonstration
     {
       'userName': 'Michael Chen',
       'headline': 'Product Manager at InnovateTech',
       'date': 'May 14, 2023',
       'avatar': '',
       'content':
-          'Just launched our new product after 6 months of hard work. Super proud of the team for their dedication and innovation!',
+          'Just launched our new product after 6 months of hard work. Super proud of the team!',
       'image':
           'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80',
       'likes': 87,
@@ -34,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'headline': 'UI/UX Designer at Creatives',
       'date': 'May 10, 2023',
       'avatar': '',
-      'content': 'Excited to share my latest design project! Feedback welcome.',
+      'content': 'Excited to share my latest design project!',
       'image':
           'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
       'likes': 45,
@@ -46,24 +52,64 @@ class _HomeScreenState extends State<HomeScreen> {
       'headline': 'Software Engineer at DevWorks',
       'date': 'May 8, 2023',
       'avatar': '',
-      'content':
-          'Attended an amazing tech conference this week. Learned a lot and met great people!',
+      'content': 'Attended an amazing tech conference this week!',
       'image':
           'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80',
       'likes': 62,
       'comments': 12,
       'liked': false,
     },
+    // Add more mock posts if needed
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMorePosts();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !_isLoadingMore) {
+        _loadMorePosts();
+      }
+    });
+  }
+
+  void _loadMorePosts() async {
+    setState(() => _isLoadingMore = true);
+
+    await Future.delayed(const Duration(seconds: 1)); // simulate loading
+
+    int start = (_page - 1) * _limit;
+    int end = start + _limit;
+    if (start < _allPosts.length) {
+      setState(() {
+        _posts.addAll(_allPosts.sublist(start, end.clamp(0, _allPosts.length)));
+        _page++;
+      });
+    }
+
+    setState(() => _isLoadingMore = false);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screens = [
-      // Home Feed
+      // Home Feed with lazy loading
       ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.all(16),
-        itemCount: _posts.length,
+        itemCount: _posts.length + 1,
         itemBuilder: (context, index) {
+          if (index == _posts.length) {
+            return _isLoadingMore
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : const SizedBox.shrink();
+          }
+
           final post = _posts[index];
           return Card(
             margin: const EdgeInsets.only(bottom: 20),
@@ -134,21 +180,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : Colors.grey),
                         onPressed: () {
                           setState(() {
-                            _posts[index]['liked'] = !_posts[index]['liked'];
-                            _posts[index]['likes'] +=
-                                _posts[index]['liked'] ? 1 : -1;
+                            post['liked'] = !post['liked'];
+                            post['likes'] += post['liked'] ? 1 : -1;
                           });
                         },
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.comment_outlined,
-                            color: Colors.grey),
-                        onPressed: () {},
+                      const IconButton(
+                        icon: Icon(Icons.comment_outlined, color: Colors.grey),
+                        onPressed: null,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.share_outlined,
-                            color: Colors.grey),
-                        onPressed: () {},
+                      const IconButton(
+                        icon: Icon(Icons.share_outlined, color: Colors.grey),
+                        onPressed: null,
                       ),
                     ],
                   ),
@@ -158,11 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      // Post (placeholder)
       CreatePostCard(),
-      // Jobs
       const JobsScreen(),
-      // Profile
       ProfileScreen(),
     ];
 
@@ -192,29 +232,13 @@ class _HomeScreenState extends State<HomeScreen> {
       body: screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Post',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'Jobs',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_box), label: 'Post'),
+          BottomNavigationBarItem(icon: Icon(Icons.work), label: 'Jobs'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
