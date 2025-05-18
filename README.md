@@ -2,6 +2,8 @@
 
 A complete full-stack job portal application where users can register, view job listings, and apply for jobs. Built using **Flutter** for the frontend and **Spring Boot** for the backend.
 
+ [Click here to watch the project video](https://drive.google.com/drive/u/0/my-drive)
+
 ---
 
 ## 🛠 Technologies Used
@@ -80,4 +82,5 @@ git clone https://github.com/Mihir-prajapati685/job-finder-app.git
 cd frontend
 flutter pub get
 flutter run
+ 
 
