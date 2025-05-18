@@ -2,7 +2,7 @@
 
 A complete full-stack job portal application where users can register, view job listings, and apply for jobs. Built using **Flutter** for the frontend and **Spring Boot** for the backend.
 
- [Click here to watch the project video](https://drive.google.com/drive/u/0/folders/1kTCJuGSdtnDJyz0GSJ-TFf-YEGN9R9pU)
+ [Click here to watch the project video](https://drive.google.com/file/d/1DLc2EtHlr9zIuveI_n1H2cc-sru8Q3Rh/view?usp=sharing)
 
 ---
 
