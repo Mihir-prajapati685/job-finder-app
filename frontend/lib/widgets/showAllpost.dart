@@ -11,7 +11,6 @@ class _PostsFeedState extends State<PostsFeed> {
   @override
   void initState() {
     super.initState();
-    // Fetch posts after first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProfileProvider>(context, listen: false).fetchUserPosts();
     });
@@ -61,8 +60,7 @@ class _PostsFeedState extends State<PostsFeed> {
 
                   final user = post['user'] ?? {};
                   final userName = user['username'] ?? 'Unknown';
-                  final headline =
-                      user['email'] ?? ''; // change to headline if needed
+                  final headline = user['email'] ?? '';
                   final date = post['createAt'] != null
                       ? post['createAt'].toString().substring(0, 10)
                       : '';
@@ -135,7 +133,114 @@ class _PostsFeedState extends State<PostsFeed> {
                                   ],
                                 ),
                               ),
-                              Icon(Icons.more_horiz),
+                              PopupMenuButton<String>(
+                                onSelected: (value) async {
+                                  if (value == 'edit') {
+                                    print(
+                                        'Edit clicked for post: ${post['id']}');
+
+                                    // Example: Show dialog or screen to edit content, here I just simulate update
+                                    final updatedContent =
+                                        await showDialog<String>(
+                                      context: context,
+                                      builder: (context) {
+                                        String newContent =
+                                            post['content'] ?? '';
+                                        return AlertDialog(
+                                          title: Text("Edit Post"),
+                                          content: TextField(
+                                            onChanged: (val) =>
+                                                newContent = val,
+                                            controller: TextEditingController(
+                                                text: post['content']),
+                                            maxLines: 3,
+                                            decoration: InputDecoration(
+                                                hintText:
+                                                    "Update your post content"),
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              child: Text("Cancel"),
+                                              onPressed: () =>
+                                                  Navigator.pop(context, null),
+                                            ),
+                                            TextButton(
+                                              child: Text("Update"),
+                                              onPressed: () => Navigator.pop(
+                                                  context, newContent),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+
+                                    if (updatedContent != null &&
+                                        updatedContent.trim().isNotEmpty) {
+                                      // Call updatePost in ProfileProvider with post ID and updated content
+                                      await Provider.of<ProfileProvider>(
+                                              context,
+                                              listen: false)
+                                          .updatePost(
+                                        post[
+                                            'id'], // Make sure postId is string for backend
+                                        {'content': updatedContent.trim()},
+                                      );
+                                    }
+                                  } else if (value == 'delete') {
+                                    final shouldDelete = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text("Delete Post"),
+                                        content: Text(
+                                            "Are you sure you want to delete this post?"),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("Cancel"),
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                          ),
+                                          TextButton(
+                                            child: Text("Delete",
+                                                style: TextStyle(
+                                                    color: Colors.red)),
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (shouldDelete == true) {
+                                      Provider.of<ProfileProvider>(context,
+                                              listen: false)
+                                          .deletePost(post['id']);
+                                    }
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.edit, size: 18),
+                                        SizedBox(width: 8),
+                                        Text('Edit'),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete, size: 18),
+                                        SizedBox(width: 8),
+                                        Text('Delete'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                icon: Icon(Icons.more_horiz),
+                              )
                             ],
                           ),
                           SizedBox(height: 10),

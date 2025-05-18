@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HomescreenPostProvider with ChangeNotifier {
   List<Map<String, dynamic>> _posts = [];
+  List<Map<String, dynamic>> _jobs = [];
 
   List<Map<String, dynamic>> get posts => _posts;
+  List<Map<String, dynamic>> get jobs => _jobs;
 
   Future<void> fetchPosts() async {
     final pref = await SharedPreferences.getInstance();
@@ -32,4 +34,35 @@ class HomescreenPostProvider with ChangeNotifier {
       throw Exception('Something went wrong: $error');
     }
   }
+
+  Future<void> searchPosts(String keyword) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('token');
+
+    final url =
+        Uri.parse('http://localhost:8084/jobpost/search?keyword=$keyword');
+
+    try {
+      final response = await http.get(url, headers: {
+        'Content-Type': 'application/json',
+        'Authorization': '$token'
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        _posts = List<Map<String, dynamic>>.from(data['posts']);
+        _jobs = List<Map<String, dynamic>>.from(data['jobs']);
+
+        notifyListeners();
+      } else {
+        throw Exception('Search failed');
+      }
+    } catch (e) {
+      throw Exception('Search error: $e');
+    }
+  }
 }
+
+
+

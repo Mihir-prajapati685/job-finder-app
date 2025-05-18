@@ -1,9 +1,11 @@
 package com.example.backend.Controller;
 
 import com.example.backend.Models.CommentsModel;
+import com.example.backend.Models.JobModels;
 import com.example.backend.Models.PostModel;
 import com.example.backend.Models.UserModel;
 import com.example.backend.Repo.CommentRepo;
+import com.example.backend.Repo.JobRepo;
 import com.example.backend.Repo.PostRepo;
 import com.example.backend.Services.CommentsService;
 import com.example.backend.Services.CustomUserDetails;
@@ -15,7 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/jobpost")
@@ -25,6 +29,8 @@ public class PostController {
     private PostService postService;
     @Autowired
     private PostRepo postRepo;
+    @Autowired
+    private JobRepo jobRepo;
 
     @Autowired
     private CommentsService commentsService;
@@ -56,8 +62,7 @@ public class PostController {
         return ResponseEntity.ok(allPosts);
     }
 
-
-    @PutMapping("/post/{postId}/update")
+    @PutMapping("/update/{postId}")
     public ResponseEntity<?> updatePost(
             @PathVariable Long postId,
             @RequestBody PostModel updatedPost,
@@ -96,9 +101,28 @@ public class PostController {
         }
     }
 
+//    @GetMapping("/search")
+//    public ResponseEntity<List<PostModel>> searchPosts(@RequestParam String keyword) {
+//        return ResponseEntity.ok(postService.searchPosts(keyword));
+//    }
+
     @GetMapping("/search")
-    public ResponseEntity<List<PostModel>> searchPosts(@RequestParam String keyword) {
-        return ResponseEntity.ok(postService.searchPosts(keyword));
+    public Map<String, Object> searchPostsAndJobs(@RequestParam String keyword) {
+        List<PostModel> postResults;
+        if (keyword.startsWith("@")) {
+            String username = keyword.substring(1);
+            postResults = postRepo.findByUser_UsernameContainingIgnoreCase(username);
+        } else {
+            postResults = postRepo.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword);
+        }
+
+        List<JobModels> jobResults = jobRepo.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("posts", postResults);
+        response.put("jobs", jobResults);
+        return response;
     }
+
 
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linkedin_clone/providers/homescreen_post_provider.dart';
+import 'package:linkedin_clone/widgets/openCommentsBottomSheet.dart';
 import 'package:provider/provider.dart';
 import 'package:linkedin_clone/widgets/create_post_card.dart';
 import 'profile_screen.dart';
@@ -50,6 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final postProvider = Provider.of<HomescreenPostProvider>(context);
     final posts = postProvider.posts;
+    final jobs = postProvider.jobs;
+
+    final combinedList = [...posts, ...jobs];
 
     final screens = [
       _isLoading
@@ -58,123 +62,176 @@ class _HomeScreenState extends State<HomeScreen> {
               ? Center(child: Text('Error: $_errorMessage'))
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: posts.length,
+                  itemCount: combinedList.length,
                   itemBuilder: (context, index) {
-                    final post = posts[index];
+                    final item = combinedList[index];
 
-                    final user = post['user'] ?? {};
-                    final userName = user['username'] ?? 'Unknown';
-                    final headline = user['email'] ?? '';
-                    final date = post['createAt'] != null
-                        ? post['createAt'].toString().substring(0, 10)
-                        : '';
-                    final avatar =
-                        userName.isNotEmpty ? userName[0].toUpperCase() : '?';
-                    final content = post['content'] ?? '';
-                    final image = post['url'] ?? '';
-                    int likes = post['likes'] ?? 0;
-                    final comments = post['comments'] ?? 0;
-                    bool liked = post['liked'] ?? false;
+                    // Detect if it's a job (based on jobTitle existence)
+                    final isJob = item.containsKey('jobTitle');
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: Colors.blue.shade100,
-                                  child: Text(avatar),
-                                  radius: 24,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(userName,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      Text(headline,
-                                          style: const TextStyle(
-                                              color: Colors.grey)),
-                                      Text(date,
-                                          style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey)),
-                                    ],
+                    if (isJob) {
+                      // === JOB CARD ===
+                      final jobTitle = item['title'] ?? 'No Title';
+                      final company = item['company'] ?? 'Unknown';
+                      final type = item['type'] ?? 'Type';
+                      final location = item['location'] ?? 'Location';
+                      final createdAt = item['postedAt'] ?? '';
+
+                      return Card(
+                        color: Colors.blue[50],
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        margin: const EdgeInsets.only(bottom: 20),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(jobTitle,
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text('$company • $location',
+                                  style: const TextStyle(color: Colors.grey)),
+                              const SizedBox(height: 4),
+                              Chip(
+                                label: Text(type),
+                                backgroundColor: Colors.blue.shade100,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                  'Posted on ${createdAt.toString().substring(0, 10)}',
+                                  style: const TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      // === POST CARD ===
+                      final user = item['user'] ?? {};
+                      final userName = user['username'] ?? 'Unknown';
+                      final headline = user['email'] ?? '';
+                      final date = item['createAt'] != null
+                          ? item['createAt'].toString().substring(0, 10)
+                          : '';
+                      final avatar =
+                          userName.isNotEmpty ? userName[0].toUpperCase() : '?';
+                      final content = item['content'] ?? '';
+                      final image = item['url'] ?? '';
+                      int likes = item['likes'] ?? 0;
+                      final comments = item['comments'] ?? 0;
+                      bool liked = item['liked'] ?? false;
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor: Colors.blue.shade100,
+                                    child: Text(avatar),
+                                    radius: 24,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(userName,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        Text(headline,
+                                            style: const TextStyle(
+                                                color: Colors.grey)),
+                                        Text(date,
+                                            style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(content),
+                              if (image.isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    image,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Text('Image failed to load'),
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(content),
-                            if (image.isNotEmpty) ...[
                               const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  image,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Text('Image failed to load'),
-                                ),
+                              Row(
+                                children: [
+                                  Text('$likes likes',
+                                      style:
+                                          const TextStyle(color: Colors.grey)),
+                                  const Spacer(),
+                                  Text('$comments comments',
+                                      style:
+                                          const TextStyle(color: Colors.grey)),
+                                ],
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      liked
+                                          ? Icons.thumb_up
+                                          : Icons.thumb_up_outlined,
+                                      color: liked
+                                          ? Theme.of(context).primaryColor
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        liked = !liked;
+                                        item['liked'] = liked;
+                                        item['likes'] =
+                                            liked ? likes + 1 : likes - 1;
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.comment_outlined,
+                                        color: Colors.grey),
+                                    onPressed: () async {
+                                      await openCommentsBottomSheet(
+                                          context, item);
+                                      setState(
+                                          () {}); // Trigger rebuild after bottom sheet is dismissed
+                                    },
+                                  ),
+                                  const IconButton(
+                                    icon: Icon(Icons.share_outlined,
+                                        color: Colors.grey),
+                                    onPressed: null,
+                                  ),
+                                ],
                               ),
                             ],
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Text('$likes likes',
-                                    style: const TextStyle(color: Colors.grey)),
-                                const Spacer(),
-                                Text('$comments comments',
-                                    style: const TextStyle(color: Colors.grey)),
-                              ],
-                            ),
-                            const Divider(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    liked
-                                        ? Icons.thumb_up
-                                        : Icons.thumb_up_outlined,
-                                    color: liked
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      liked = !liked;
-                                      post['liked'] = liked;
-                                      post['likes'] =
-                                          liked ? likes + 1 : likes - 1;
-                                    });
-                                  },
-                                ),
-                                const IconButton(
-                                  icon: Icon(Icons.comment_outlined,
-                                      color: Colors.grey),
-                                  onPressed: null,
-                                ),
-                                const IconButton(
-                                  icon: Icon(Icons.share_outlined,
-                                      color: Colors.grey),
-                                  onPressed: null,
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                 ),
       const CreatePostCard(),
@@ -191,9 +248,39 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _searchController,
+              onSubmitted: (value) async {
+                final keyword = value.trim();
+                if (keyword.isNotEmpty) {
+                  setState(() {
+                    _isLoading = true;
+                    _errorMessage = null;
+                  });
+                  try {
+                    await Provider.of<HomescreenPostProvider>(context,
+                            listen: false)
+                        .searchPosts(keyword);
+                  } catch (e) {
+                    setState(() {
+                      _errorMessage = e.toString();
+                    });
+                  }
+                  setState(() {
+                    _isLoading = false;
+                  });
+                } else {
+                  _fetchPosts(); // reset to full list
+                }
+              },
               decoration: InputDecoration(
-                hintText: 'Search jobs, people, posts...',
+                hintText: 'Search posts or jobs...',
                 prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _fetchPosts();
+                  },
+                ),
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                 border:

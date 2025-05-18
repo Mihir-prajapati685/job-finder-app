@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:linkedin_clone/providers/auth_provider.dart';
+import 'package:linkedin_clone/providers/commentProvider.dart';
 import 'package:linkedin_clone/providers/homescreen_post_provider.dart';
+import 'package:linkedin_clone/providers/job_provider.dart';
 import 'package:linkedin_clone/providers/post_provider.dart';
 import 'package:linkedin_clone/providers/profile_provider.dart';
 import 'package:linkedin_clone/screens/auth/login_screen.dart';
@@ -16,8 +18,10 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
-        ChangeNotifierProvider(
-            create: (_) => HomescreenPostProvider()) // Add this
+        ChangeNotifierProvider(create: (_) => HomescreenPostProvider()),
+        ChangeNotifierProvider(create: (_) => JobProvider()),
+        ChangeNotifierProvider(create: (_) => CommentProvider()), // Add this
+        // Add this
         // Add this
       ],
       child: const MyApp(),

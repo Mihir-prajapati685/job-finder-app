@@ -12,6 +12,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @RestController
 public class CommentController {
@@ -43,6 +46,14 @@ public class CommentController {
         commentRepo.save(comment);
 
         return ResponseEntity.ok("Comment added successfully");
+    }
+
+    @GetMapping("/post/{postId}/comments")
+    public List<String> getComments(@PathVariable Long postId) {
+        return commentRepo.findByPostModel_Id(postId)
+                .stream()
+                .map(comment -> comment.getText())
+                .collect(Collectors.toList());
     }
 
 }

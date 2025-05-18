@@ -1,24 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-
-// class ProfileProvider with ChangeNotifier {
-//   String? _username;
-//   String? _email;
-//   String? _token;
-
-//   String? get username => _username;
-//   String? get email => _email;
-//   String? get token => _token;
-
-//   Future<void> loadProfileData() async {
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     _username = prefs.getString('username');
-//     _email = prefs.getString('email');
-//     _token = prefs.getString('token');
-//     notifyListeners();
-//   }
-// }
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -181,4 +160,60 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> updatePost(int postId, Map<String, dynamic> updatedData) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://localhost:8084/jobpost/update/${postId}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': '$token',
+        },
+        body: jsonEncode(updatedData),
+      );
+
+      if (response.statusCode == 200) {
+        // Update the post locally as well, if needed
+        int index = userPosts.indexWhere((post) => post['id'] == postId);
+        if (index != -1) {
+          userPosts[index] = {...userPosts[index], ...updatedData};
+          notifyListeners();
+        }
+      } else {
+        throw Exception('Failed to update post');
+      }
+    } catch (e) {
+      print('Error updating post: $e');
+    }
+  }
+
+  Future<void> deletePost(int postId) async {
+    final pref = await SharedPreferences.getInstance();
+    final token = pref.getString('token');
+    try {
+      // Assume you have an HTTP service to delete post
+      final response = await http.delete(
+          Uri.parse('http://localhost:8084/jobpost/delete/${postId}'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '$token',
+          });
+
+      if (response.statusCode == 200) {
+        // Remove the post from local list
+        userPosts.removeWhere((post) => post['id'] == postId);
+        notifyListeners();
+        await fetchUserPosts();
+      } else {
+        throw Exception('Failed to delete post');
+      }
+    } catch (e) {
+      print('Error deleting post: $e');
+      // Optionally show error in UI
+    }
+  }
+
 }
